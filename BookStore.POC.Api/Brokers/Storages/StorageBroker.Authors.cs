@@ -1,6 +1,5 @@
 ﻿using BookStore.POC.Api.Models.Authors;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace BookStore.POC.Api.Brokers.Storages
 {

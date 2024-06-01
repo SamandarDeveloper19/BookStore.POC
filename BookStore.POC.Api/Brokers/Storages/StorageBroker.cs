@@ -6,17 +6,14 @@ namespace BookStore.POC.Api.Brokers.Storages
 {
     public partial class StorageBroker : EFxceptionsContext, IStorageBroker
     {
-        private readonly IConfiguration configuration;
-
-        public StorageBroker(IConfiguration configuration)
+        public StorageBroker()
         {
-            this.configuration = configuration;
             this.Database.Migrate();
         }
 
         public async ValueTask<T> InsertAsync<T>(T @object)
         {
-            using var broker = new StorageBroker(this.configuration);
+            using var broker = new StorageBroker();
             broker.Entry(@object).State = EntityState.Added;
             await broker.SaveChangesAsync();
 
@@ -25,21 +22,21 @@ namespace BookStore.POC.Api.Brokers.Storages
 
         public IQueryable<T> SelectAll<T>() where T : class
         {
-            using var broker = new StorageBroker(this.configuration);
+            using var broker = new StorageBroker();
 
             return broker.Set<T>();
         }
 
         public async ValueTask<T> SelectAsync<T>(params object[] objectsId) where T : class
         {
-            using var broker = new StorageBroker(this.configuration);
+            using var broker = new StorageBroker();
 
             return await broker.FindAsync<T>(objectsId);
         }
 
         public async ValueTask<T> UpdateAsync<T>(T @object)
         {
-            using var broker = new StorageBroker(this.configuration);
+            using var broker = new StorageBroker();
             broker.Entry(@object).State = EntityState.Modified;
             await broker.SaveChangesAsync();
 
@@ -48,7 +45,7 @@ namespace BookStore.POC.Api.Brokers.Storages
 
         public async ValueTask<T> DeleteAsync<T>(T @object)
         {
-            using var broker = new StorageBroker(this.configuration);
+            using var broker = new StorageBroker();
             broker.Entry(@object).State = EntityState.Deleted;
             await broker.SaveChangesAsync();
 
@@ -69,6 +66,13 @@ namespace BookStore.POC.Api.Brokers.Storages
                 .HasOne(bookAuthor => bookAuthor.Author)
                 .WithMany(author => author.BookAuthors)
                 .HasForeignKey(bookAuthor => bookAuthor.AuthorId);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            string connectionString = "Data Source = StoreBook.db";
+
+            optionsBuilder.UseSqlite(connectionString);
         }
     }
 }

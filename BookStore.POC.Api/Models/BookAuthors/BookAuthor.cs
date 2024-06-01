@@ -1,4 +1,5 @@
 ﻿using BookStore.POC.Api.Models.Authors;
+using BookStore.POC.Api.Models.Books;
 
 namespace BookStore.POC.Api.Models.BookAuthors
 {
