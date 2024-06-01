@@ -6,14 +6,17 @@ namespace BookStore.POC.Api.Brokers.Storages
 {
     public partial class StorageBroker : EFxceptionsContext, IStorageBroker
     {
-        public StorageBroker()
+        private readonly IConfiguration configuration;
+
+        public StorageBroker(IConfiguration configuration)
         {
+            this.configuration = configuration;
             this.Database.Migrate();
         }
 
         public async ValueTask<T> InsertAsync<T>(T @object)
         {
-            using var broker = new StorageBroker();
+            using var broker = new StorageBroker(this.configuration);
             broker.Entry(@object).State = EntityState.Added;
             await broker.SaveChangesAsync();
 
@@ -22,21 +25,21 @@ namespace BookStore.POC.Api.Brokers.Storages
 
         public IQueryable<T> SelectAll<T>() where T : class
         {
-            using var broker = new StorageBroker();
+            using var broker = new StorageBroker(this.configuration);
 
             return broker.Set<T>();
         }
 
         public async ValueTask<T> SelectAsync<T>(params object[] objectsId) where T : class
         {
-            using var broker = new StorageBroker();
+            using var broker = new StorageBroker(this.configuration);
 
             return await broker.FindAsync<T>(objectsId);
         }
 
         public async ValueTask<T> UpdateAsync<T>(T @object)
         {
-            using var broker = new StorageBroker();
+            using var broker = new StorageBroker(this.configuration);
             broker.Entry(@object).State = EntityState.Modified;
             await broker.SaveChangesAsync();
 
@@ -45,7 +48,7 @@ namespace BookStore.POC.Api.Brokers.Storages
 
         public async ValueTask<T> DeleteAsync<T>(T @object)
         {
-            using var broker = new StorageBroker();
+            using var broker = new StorageBroker(this.configuration);
             broker.Entry(@object).State = EntityState.Deleted;
             await broker.SaveChangesAsync();
 
@@ -70,9 +73,10 @@ namespace BookStore.POC.Api.Brokers.Storages
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string connectionString = "Data Source = StoreBook.db";
+            string connectionString =
+                this.configuration.GetConnectionString(name: "DefaultConnection");
 
-            optionsBuilder.UseSqlite(connectionString);
+            optionsBuilder.UseSqlServer(connectionString);
         }
     }
 }
